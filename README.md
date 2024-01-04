@@ -1,1 +1,1 @@
-# LPLM: A Neural Language Model for Cardinality Estimationof LIKE-Queries
+# LPLM: A Neural Language Model for Cardinality Estimation of LIKE-Queries
