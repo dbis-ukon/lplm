@@ -85,13 +85,15 @@ def get_vocabulary(filename):
     return ''.join(sorted(char_set)) + '$.#'
 
 def main():
-    A_NLM_Configs = namedtuple('A_NLM_Configs', ['vocabulary', 'hidden_size', 'learning_rate', 'batch_size', 'datasize',
-                                                 'num_epochs', 'train_data_path', 'test_data_path',
-                                                 'save_qerror_file_path', 'device', 'save_path'])
+    A_NLM_Configs = namedtuple('A_NLM_Configs',
+                               ['vocabulary', 'hidden_size', 'learning_rate', 'batch_size', 'datasize',
+                                        'num_epochs', 'train_data_path', 'test_data_path',
+                                        'save_qerror_file_path', 'device', 'save_path'])
 
-    vocab_file_path = 'path_to_file_that_you_get_all_possible_vocabularies'  # vocabulary can be set manually as well or can be taken from train file
-    train_data_path = 'file_train_path'
-    test_data_path = 'file_test_path'  # Adjust this to the correct file path
+    vocab_file_path = 'train.txt'  # vocabulary can be set manually as well or can be taken from train file
+    train_data_path = 'train.txt'
+    test_data_path = 'test.txt'  # Adjust this to the correct file path
+    save_model_path = 'save_model.pth'
 
     card_estimator_configs = A_NLM_Configs(
         vocabulary=get_vocabulary(vocab_file_path),
@@ -104,7 +106,7 @@ def main():
         test_data_path=test_data_path,
         save_qerror_file_path='save_path_qerrors',
         device=torch.device("cuda" if torch.cuda.is_available() else "cpu"),
-        save_path='save_model.pth'
+        save_path=save_model_path
     )
 
     char2idx = {letter: i for i, letter in enumerate(card_estimator_configs.vocabulary)}
