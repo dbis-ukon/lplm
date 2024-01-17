@@ -34,8 +34,8 @@ def LIKE_pattern_to_newLanguage(pattern_list, pattern_type):
                     count += 1
                 else:
                     if (
-                        new_pattern[-1] not in ('_', '@')
-                        and char not in ('_', '@')
+                        new_pattern[-1] not in ('_')
+                        and char not in ('_')
                     ):
                         new_pattern += char + '$'
                     else:
