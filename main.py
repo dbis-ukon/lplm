@@ -114,13 +114,13 @@ def main():
     model = A_NLM_model.Cardinality_Estimator(1, card_estimator_configs.hidden_size,
                                               card_estimator_configs.device, len(char2idx))
 
-    train_data = misc_utils.addpaddingTrain(train_data_path, char2idx)
+    train_data = misc_utils.addpaddingTrain(card_estimator_configs.train_data_path, char2idx)
     dataloadertrain = DataLoader(train_data, batch_size=card_estimator_configs.batch_size, shuffle=True)
     trained_model = model_train(dataloadertrain, model, card_estimator_configs.device,
                                card_estimator_configs.learning_rate, card_estimator_configs.num_epochs,
                                card_estimator_configs.save_path)
 
-    datasettest = misc_utils.addpaddingTest(test_data_path, char2idx)  # Assuming you have a similar function for test data
+    datasettest = misc_utils.addpaddingTest(card_estimator_configs.test_data_path, char2idx)  # Assuming you have a similar function for test data
     dataloadertest = DataLoader(datasettest, batch_size=1)
     estimate_cardinality(dataloadertest, trained_model, card_estimator_configs.device, card_estimator_configs.datasize)
 
