@@ -21,14 +21,17 @@ def generate_like_patterns(dataset_file_path, training_data_file, train_data_siz
     all_patterns = set()
     while len(all_patterns) < train_data_size:
         select_random_row = list(random.choice(all_rows))
+
         random_indexes = random.sample(range(len(select_random_row)), random.randint(0, len(select_random_row)))
+        random_indexes.sort()
+
         for key in random_indexes:
             if key + 1 not in random_indexes and key - 1 not in random_indexes:
                 select_random_row[key] = '_'
             else:
                 select_random_row[key] = '%'
 
-        like_pattern = re.sub(r'%+', '%', ''.join(select_random_row)).replace('_%', '%').replace('%_', '%')
+        like_pattern = re.sub(r'%+', '%', ''.join(select_random_row))
         if like_pattern and like_pattern != '%':
             all_patterns.add(like_pattern)
 
@@ -36,6 +39,6 @@ def generate_like_patterns(dataset_file_path, training_data_file, train_data_siz
         saving_path.write('\n'.join(all_patterns) + '\n')
 
 if __name__ == "__main__":
-    train_dataset_size = 50000
+    train_dataset_size = 5000000
     generate_like_patterns('Datasets/author_name.csv',
                            'author_names_training_set.txt', train_dataset_size)
