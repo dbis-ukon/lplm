@@ -1,8 +1,3 @@
-
-
-
-
-
 import random
 import re
 
