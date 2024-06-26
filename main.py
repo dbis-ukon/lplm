@@ -1,128 +1,96 @@
 
+
+'####################################################################################'
+
+import time
 from collections import namedtuple
-import torch
+
+from pympler import asizeof
 from torch.utils.data import DataLoader
-
+import torch
 import misc_utils
-import A_NLM_model
+import selectivity_estimator
 import numpy as np
-import os
 
-def load_estimation_model(model_file_name, model, device):
-    """
-    Load a saved estimation model.
 
-    Args:
-        model_file_name (str): Path to the saved model file.
-        model (torch.nn.Module): Estimation model.
-        device (torch.device): Device to load the model on.
+# This function load the saved model
+def load_estimation_model(model_file_name, model_card, device):
+    model_card.load_state_dict(torch.load(model_file_name))
+    return model.to(device)
 
-    Returns:
-        torch.nn.Module: Loaded estimation model.
-    """
-    if os.path.exists(model_file_name):
-        model.load_state_dict(torch.load(model_file_name))
-        return model.to(device)
-    else:
-        raise FileNotFoundError(f"Model file not found: {model_file_name}")
 
-def model_train(train_data, model, device, learning_rate, num_epochs, model_save_path):
-    """
-    Train an estimation model and save the trained model.
-
-    Args:
-        train_data (torch.utils.data.Dataset): Training dataset.
-        model (torch.nn.Module): Estimation model.
-        device (torch.device): Device to perform computations on.
-        learning_rate (float): Learning rate for training.
-        num_epochs (int): Number of training epochs.
-        model_save_path (str): Path to save the trained model.
-
-    Returns:
-        torch.nn.Module: Trained estimation model.
-    """
-    model = A_NLM_model.train_model(train_data, model, device, learning_rate, num_epochs)
+# This function trains and returns the embedding model
+def modelTrain(train_data, model, device, learning_rate, num_epocs, model_save_path):
+    model = selectivity_estimator.train_model(train_data, model, device, learning_rate, num_epocs)
     torch.save(model.state_dict(), model_save_path)
     return model
 
 
-def estimate_cardinality(test_dataset, model, device, dataset_size):
-    """
-    Estimate cardinality and print evaluation metrics.
-
-    Args:
-        test_dataset (torch.utils.data.Dataset): Test dataset.
-        model (torch.nn.Module): Trained model.
-        device (torch.device): Device to perform computations on.
-        dataset_size (int): Size of the dataset.
-
-    Returns:
-        None
-    """
+# This function estimate the cardinalities and saves them to a txt file
+def estimate_cardinality(test_dataset, model, device, save_file_path, dataset_size):
+    write_to_file = open(save_file_path, 'w')
+    qerror_list = []
     with torch.no_grad():
-        qerror_list = []
         for name, mask, actual_card in test_dataset:
-            name, mask, actual_card = name.to(device), mask.to(device), actual_card.to(device)
+            name = name.to(device)
             output = model(name)
+            output = output.to(device)
+            mask = mask.to(device)
             output = torch.prod(torch.pow(output, mask)) * dataset_size
             qerror = misc_utils.compute_qerrors(actual_card, output.item())
-            qerror_list.append(qerror[0].cpu().numpy())
+            qerror_list.append(qerror[0])
+            write_to_file.write(str(output.item()) + '\n')
 
-        print(f'G-mean: {np.round(misc_utils.g_mean(qerror_list), 4)}')
-        print(f'Mean: {np.round(np.average(qerror_list), 4)}')
-        print(f'Median: {np.round(np.percentile(qerror_list, 50), 4)}')
-        print(f'90th: {np.round(np.percentile(qerror_list, 90), 4)}')
-        print(f'99th: {np.round(np.percentile(qerror_list, 99), 4)}')
+    print(f'G-mean: {np.round(misc_utils.g_mean(qerror_list), 4)}')
+    print(f'Mean: {np.round(np.average(qerror_list), 4)}')
+    print(f'Median: {np.round(np.percentile(qerror_list, 50), 4)}')
+    print(f'90th: {np.round(np.percentile(qerror_list, 90), 4)}')
+    print(f'99th: {np.round(np.percentile(qerror_list, 99), 4)}')
 
 
-def get_vocabulary(filename):
-    char_set = set()
-    with open(filename, 'r') as file:
-        for line in file:
-            line = line.strip().split(':')[0]
-            char_set.update(char for char in line.strip() if char != '%')
-    print(''.join(sorted(char_set)) + '$.#')
-    return ''.join(sorted(char_set)) + '$.#'
+def get_vocab(trainfile):
 
-def main():
-    A_NLM_Configs = namedtuple('A_NLM_Configs',
-                               ['vocabulary', 'hidden_size', 'learning_rate', 'batch_size', 'datasize',
-                                        'num_epochs', 'train_data_path', 'test_data_path',
-                                        'save_qerror_file_path', 'device', 'save_path'])
+    vocab_dict = {}
+    for i in open(trainfile):
+        i=i.strip().split(':')[0]
+        for k in i:
+            if k != '%' and k not in vocab_dict:
+                vocab_dict[k] = 0
+    vocab = ''
+    for token in vocab_dict:
+        vocab += token
+    return vocab + '$.#'
 
-    vocab_file_path = 'train.txt'  # vocabulary can be set manually as well or can be taken from train file
-    train_data_path = 'train.txt'
-    test_data_path = 'test.txt'  # Adjust this to the correct file path
-    save_model_path = 'save_model.pth'
 
-    card_estimator_configs = A_NLM_Configs(
-        vocabulary=get_vocabulary(vocab_file_path),
-        hidden_size=256,
-        datasize=450000,
-        learning_rate=0.0001,
-        batch_size=128,
-        num_epochs=64,
-        train_data_path=train_data_path,
-        test_data_path=test_data_path,
-        save_qerror_file_path='save_path_qerrors',
-        device=torch.device("cuda" if torch.cuda.is_available() else "cpu"),
-        save_path=save_model_path
-    )
-
-    char2idx = {letter: i for i, letter in enumerate(card_estimator_configs.vocabulary)}
-
-    model = A_NLM_model.Cardinality_Estimator(1, card_estimator_configs.hidden_size,
-                                              card_estimator_configs.device, len(char2idx))
-
-    train_data = misc_utils.addpaddingTrain(card_estimator_configs.train_data_path, char2idx)
-    dataloadertrain = DataLoader(train_data, batch_size=card_estimator_configs.batch_size, shuffle=True)
-    trained_model = model_train(dataloadertrain, model, card_estimator_configs.device,
-                               card_estimator_configs.learning_rate, card_estimator_configs.num_epochs,
-                               card_estimator_configs.save_path)
-
-    datasettest = misc_utils.addpaddingTest(card_estimator_configs.test_data_path, char2idx)  # Assuming you have a similar function for test data
-    dataloadertest = DataLoader(datasettest, batch_size=1)
-    estimate_cardinality(dataloadertest, trained_model, card_estimator_configs.device, card_estimator_configs.datasize)
 
 if __name__ == "__main__":
-    main()
+    vocabulary =get_vocab('author_train.txt')
+    trainpath = 'author_train.txt'
+    testpath = 'author_test.txt'
+    savepath = 'result.txt'
+    savemodel= 'model.pth'
+    A_NLM_configs = namedtuple('A_NLM_configs', ['vocabulary', 'hidden_size', 'learning_rate', 'batch_size', 'datasize',
+                                                 'num_epocs', 'train_data_path', 'test_data_path',
+                                                 'save_qerror_file_path', 'device', 'save_path'])
+
+    card_estimator_configs = A_NLM_configs(vocabulary= vocabulary, hidden_size=256,
+                                           datasize=450000, learning_rate=0.0001, batch_size=128, num_epocs=64,
+                                           train_data_path=trainpath,
+                                           test_data_path=testpath,
+                                           save_qerror_file_path=savepath,
+                                           device=torch.device("cuda" if torch.cuda.is_available() else "cpu"),
+                                           save_path=savemodel)
+    char2idx = {letter: i for i, letter in enumerate(card_estimator_configs.vocabulary)}
+
+    model = selectivity_estimator.Cardinality_Estimator(1, card_estimator_configs.hidden_size, card_estimator_configs.device,
+                                              len(char2idx))
+    train_data = misc_utils.addpaddingTrain(card_estimator_configs.train_data_path, char2idx)
+    dataloadertrain = DataLoader(train_data, batch_size=card_estimator_configs.batch_size, shuffle=True)
+    trained_model = modelTrain(dataloadertrain, model, card_estimator_configs.device,
+                               card_estimator_configs.learning_rate, card_estimator_configs.num_epocs,
+                               card_estimator_configs.save_path)
+    datasettest = misc_utils.addpaddingTest(card_estimator_configs.test_data_path, char2idx)
+    dataloadertest = DataLoader(datasettest, batch_size=1)
+
+    estimate_cardinality(dataloadertest, trained_model, card_estimator_configs.device,
+                         card_estimator_configs.save_qerror_file_path, card_estimator_configs.datasize)
