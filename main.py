@@ -60,10 +60,10 @@ def get_vocab(trainfile):
 
 
 if __name__ == "__main__":
-    vocabulary =get_vocab('author_train.txt')
-    trainpath = 'author_train.txt'
-    testpath = 'author_test.txt'
-    savepath = 'result.txt'
+    vocabulary =get_vocab('train.txt')
+    trainpath = 'train.txt'
+    testpath = 'test.txt'
+    savepath = 'estimated_cardinalities.txt'
     savemodel= 'model.pth'
     A_NLM_configs = namedtuple('A_NLM_configs', ['vocabulary', 'hidden_size', 'learning_rate', 'batch_size', 'datasize',
                                                  'num_epocs', 'train_data_path', 'test_data_path',
