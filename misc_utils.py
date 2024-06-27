@@ -63,7 +63,6 @@ def loadtrainData(filename, char2idx):
     inputs = []
     targets = []
     length = []
-    count = 0
     for line in open(filename):
         line_ = line.strip().split(':')
         transformedLikepattern = LIKE_pattern_to_newLanguage(line_[0].split('%'), line_[1])
