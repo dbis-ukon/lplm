@@ -72,9 +72,6 @@ def loadtrainData(filename, char2idx):
         length.append(len(transformed_to_tensor))
         ground_prob_list = [float(element) for element in line_[-1].split(' ')]
         targets.append(ground_prob_list)
-        count +=1
-        if count == 300000:
-            break
     return inputs, targets, max(length)
 
 #This function pads the zero vectors to like-patterns.
@@ -100,7 +97,6 @@ def loadtestData(filename, char2idx):
     inputs = []
     length = []
     actual_card = []
-    count = 0
     with open(filename, 'r') as file:
         for line in file:
             line_ = line.strip().split(':')
@@ -109,9 +105,6 @@ def loadtestData(filename, char2idx):
             transformed_to_tensor = name2tensor(unidecode(transformedLikepattern), char2idx)
             inputs.append(transformed_to_tensor)
             length.append(len(transformed_to_tensor))
-            count +=1
-            if count ==100000:
-                break
     return inputs, max(length), actual_card
 
 
