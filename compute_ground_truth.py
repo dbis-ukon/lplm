@@ -187,7 +187,8 @@ def load_like_patterns(filename):
 
 
 if __name__ == "__main__":
-    db_path = 'path to database'
+    
+    db_path = 'path to database' #Path to an SQLite database where each dataset is a column.
     like_patterns_path = 'path to training dataset'
     file_to_save_ground = 'path to save ground truth'
 
