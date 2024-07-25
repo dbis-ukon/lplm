@@ -78,25 +78,27 @@ def language_to_query(list_languages):
 
 def LIKE_pattern_to_newLanguage(liste):
     transformed_pattern = ''
-    for key in liste:
-        if len(key) == 1:
-            transformed_pattern += key
+    for pattern in liste:
+        if len(pattern) == 1:
+            transformed_pattern += pattern
         else:
-            new = ''
+            new_pattern = ''
             count = 0
-            for char in key:
+            for char in pattern:
                 if count < 1:
-                    new += char
+                    new_pattern += char
                     count += 1
                 else:
-                    if new[-1] != '_' and char != '_' :
-                        new += '$' + char
+                    if (
+                        new_pattern[-1] not in ('_', '@')
+                        and char not in ('_', '@')
+                    ):
+                        new_pattern += char + '$'
                     else:
-                        new += char
-            transformed_pattern += new
+                        new_pattern += char
+            transformed_pattern += new_pattern
     transformed_pattern = transformed_pattern.replace('_', '^')
     return transformed_pattern
-
 
 def inject_type(liste, type_):
     newliste = []
