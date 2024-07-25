@@ -1,7 +1,6 @@
 import os
 import sqlite3
 
-
 def return_cardinality(query_list, c, dataset_size):
     if len(query_list) == 1:
         cn = c.execute('SELECT count(*) FROM pattern WHERE trans LIKE ?', (query_list[0],)).fetchall()[0][0]
@@ -12,10 +11,9 @@ def return_cardinality(query_list, c, dataset_size):
 
         cn1 = c.execute('SELECT count(*) FROM pattern WHERE trans LIKE ?', (query_list[1],)).fetchall()[0][0]
         if cn1 == 0:
-            print(f"Error: Like pattern actual card is {0}")
+            print(query_list)
         prob = float(cn) / cn1
         return prob
-
 
 
 def find_all_possible_probabilities(like, all_con_prob_list):
@@ -53,10 +51,9 @@ def find_all_possible_probabilities(like, all_con_prob_list):
                 all_con_prob_list.append(('%' + like[:-1] + '^', '%' + like[:-1] + '%'))
                 return find_all_possible_probabilities(like[:-1], all_con_prob_list)
 
-
 def language_to_query(list_languages):
     list_queries = []
-    list_wildcards = ['$', '%', '_', '@']
+    list_wildcards = ['$', '%', '_']
     for con in list_languages:
         list_pairs = []
         for l in con:
@@ -66,7 +63,6 @@ def language_to_query(list_languages):
                 if len(query) == 0:
                     query += l_[i]
                 else:
-
                     if query[-1] not in list_wildcards and l_[i] not in list_wildcards:
                         query += '%' + l_[i]
                     else:
@@ -78,30 +74,27 @@ def language_to_query(list_languages):
 
 def LIKE_pattern_to_newLanguage(liste):
     transformed_pattern = ''
-    for pattern in liste:
-        if len(pattern) == 1:
-            transformed_pattern += pattern
+    for key in liste:
+        if len(key) == 1:
+            transformed_pattern += key
         else:
-            new_pattern = ''
+            new = ''
             count = 0
-            for char in pattern:
+            for char in key:
                 if count < 1:
-                    new_pattern += char
+                    new += char
                     count += 1
                 else:
-                    if (
-                        new_pattern[-1] not in ('_', '@')
-                        and char not in ('_', '@')
-                    ):
-                        new_pattern += char + '$'
+                    if new[-1] != '_' and char != '_' and char != '@' and new[-1] != '@':
+                        new += '$' + char
                     else:
-                        new_pattern += char
-            transformed_pattern += new_pattern
+                        new += char
+            transformed_pattern += new
     transformed_pattern = transformed_pattern.replace('_', '^')
     return transformed_pattern
-
 def inject_type(liste, type_):
     newliste = []
+
     if type_ == 'prefix' or type_ == 'end_underscore':
         liste.insert(-1, [liste[-1][0][1:], liste[-1][0]])
         for i in range(len(liste)):
@@ -131,11 +124,12 @@ def inject_type(liste, type_):
         return newliste
 
 
-def main(db, list_of_patterns, path_file_tosave, datasetsize):
+
+def main(db, listem, i):
     c = sqlite3.connect(db).cursor()
-    file_to_save = open(path_file_tosave, 'w')
-    for likepatterns in list_of_patterns:
-        print(likepatterns)
+    path = 'author_ground_truth' + str(i) + '.txt'
+    file_to_save = open(path, 'w')
+    for likepatterns in listem:
         newlike = likepatterns.strip().replace(' ', '@')
         likepatterns = ('%' + newlike + '%').replace('%%', '%').replace('%_', '_').replace('_%', '_')
         if likepatterns[0] == '%':
@@ -145,7 +139,6 @@ def main(db, list_of_patterns, path_file_tosave, datasetsize):
         transformed_pattern = LIKE_pattern_to_newLanguage(likepatterns.split('%'))
         all_con_language_prob = find_all_possible_probabilities(transformed_pattern, [])
         all_con_prob1 = language_to_query(all_con_language_prob)
-
         if (newlike[0] == '%' and newlike[-1] != '%' and newlike[-1] != '_'):
             all_con_prob = inject_type(all_con_prob1, 'suffix')
             newlike = likepatterns + ':' + 'suffix'
@@ -171,13 +164,12 @@ def main(db, list_of_patterns, path_file_tosave, datasetsize):
         liste = []
         try:
             for pair in all_con_prob:
-                liste.append(return_cardinality(pair, c, datasetsize))
+                liste.append(return_cardinality(pair, c, 450000))
+
             s = [str(k) for k in liste]
             file_to_save.write(newlike + ':' + ' '.join(s) + '\n')
         except:
             print(likepatterns)
-
-
 
 
 def load_like_patterns(filename):
