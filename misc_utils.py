@@ -2,13 +2,19 @@ import numpy as np
 import torch
 from unidecode import unidecode
 
-#This function returns geometric mean of a list
+# This function returns the geometric mean of a list of numbers.
 def g_mean(list_):
     log_list_ = np.log(list_)
     return np.exp(log_list_.mean())
 
 
-#This function transforms the LIKE patterns to new language
+# This function transforms LIKE pattern into a new language pattern.
+# The transformation involves modifying characters based on the given pattern type.
+# Parameters:
+#   pattern_list (list): A list of LIKE pattern (split by '%').
+#   pattern_type (str): The type of pattern transformation ('prefix', 'suffix', etc.).
+# Returns:
+#   str: The transformed pattern.
 def LIKE_pattern_to_newLanguage(pattern_list, pattern_type):
     transformed_pattern = ''
     for pattern in pattern_list:
@@ -43,7 +49,7 @@ def LIKE_pattern_to_newLanguage(pattern_list, pattern_type):
     return transformed_pattern
 
 
-#This function computes loss
+# This function computes the binary cross-entropy loss between predictions and targets.
 def binary_crossentropy(preds, targets, mask):
     loss = targets * torch.log(preds + 0.00001) + (1 - targets) * torch.log(1 - (preds - 0.00001))
     if mask is not None:
@@ -58,7 +64,7 @@ def name2tensor(name, char2idx):
     return tensor
 
 
-#This function loads LIKE-patterns with ground truth probabilities
+# This function loads LIKE patterns and corresponding ground truth probabilities for training.
 def loadtrainData(filename, char2idx):
     inputs = []
     targets = []
@@ -73,7 +79,7 @@ def loadtrainData(filename, char2idx):
         targets.append(ground_prob_list)
     return inputs, targets, max(length)
 
-#This function pads the zero vectors to like-patterns.
+# This function pads zero vectors to LIKE patterns for training.
 def addpaddingTrain(filename, char2idx):
     zeros_vector = [[0] * len(char2idx)]
     padded_inputs = []
@@ -91,7 +97,7 @@ def addpaddingTrain(filename, char2idx):
     return train_dataset
 
 
-#This function takes a file path that contains test LIKE-patterns
+# This function loads LIKE patterns from a test dataset.
 def loadtestData(filename, char2idx):
     inputs = []
     length = []
@@ -123,6 +129,6 @@ def addpaddingTest(filename, char2idx):
     return test_dataset
 
 
-##This function compute and return q-error
+# This function computes and returns the Q-error between actual and estimated cardinalities.
 def compute_qerrors(actual_card, estimated_card):
     return max(actual_card/estimated_card, estimated_card/actual_card)
