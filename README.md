@@ -1,6 +1,6 @@
 # LPLM: A Neural Language Model for Cardinality Estimation of LIKE-Queries
 
-LPLM (LIKE Pattern Language Model) is a deep learning-based approach designed to estimate the cardinalities of SQL LIKE-queries. This model leverages neural networks to predict the selectivity of queries, which can then be used to optimize query execution plans in databases. LPLM operates in three main steps:
+LPLM (LIKE Pattern Language Model) is a deep learning-based approach designed to estimate the cardinalities of SQL LIKE-queries. This model leverages neural language models to predict the cardinalities of LIKE queries, which can then be used to optimize query execution plans in databases. LPLM operates in three main steps:
 
 ---
 
