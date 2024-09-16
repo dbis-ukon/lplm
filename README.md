@@ -1,24 +1,71 @@
 # LPLM: A Neural Language Model for Cardinality Estimation of LIKE-Queries
 
-LPLM has three main steps.
+LPLM (LIKE Pattern Language Model) is a deep learning-based approach designed to estimate the cardinalities of SQL LIKE-queries. This model leverages neural networks to predict the selectivity of queries, which can then be used to optimize query execution plans in databases. LPLM operates in three main steps:
 
-    Prepare training datasets.
-    --- To create LIKE patterns training data set, you have to run prepare_training_data.py.
+---
 
-    Compute ground truth probabilities.
+## 1. Prepare Training Datasets
 
-    --- To compute the ground truth cardinalities, you have to run compute_ground_truth.py file. 
-    --- As a database, we used SQLite library that provides a lightweight disk-based database from Python.
-    --- Computing ground truth probabilities of LIKE-patterns is timely and expensive. Therefore, we use multi processes with 1000 different databases.
+To train LPLM, you first need a dataset of SQL LIKE-patterns. This step generates the LIKE-patterns that will be used to train the model.
 
-    Train the Model and get estimated cardinalities.
+**Instructions:**
+- Run the `prepare_training_data.py` script to generate the LIKE patterns training dataset.
 
-    --- LPLM learns from the LIKE-Patterns and ground truth probabilities. main.py has the commands to train the Model and get the estimated cardinalities. 
-    --- The Model can be trained from scratch or reloaded from a previously saved model to estimate the cardinalities of test queries.
-    
-To inject the estimated cardinalities to PostgreSQL:
+---
 
-    --- First apply benchmark.patch
-    --- Second, follow instructions given in 
-        https://github.com/Nathaniel-Han/End-to-End-CardEst-Benchmark
-    --- Our modifications accept selectivities for LIKE and equality patterns.
+## 2. Compute Ground Truth Probabilities
+
+Once the LIKE patterns are generated, the next step is to compute the ground truth cardinalities for these patterns. These cardinalities represent the actual selectivity of the LIKE-queries when executed on a database.
+
+**Instructions:**
+- Run the `compute_ground_truth.py` script to compute the ground truth cardinalities for the generated LIKE patterns.
+  
+  **Details:**
+  - LPLM uses the SQLite library to interact with databases and compute these probabilities.
+  - Computing ground truth cardinalities for LIKE-queries is time-consuming and resource-intensive. To mitigate this, the process is parallelized using multiple processes, each working with different database instances.
+  - We use 1000 different SQLite databases for efficient and scalable computation.
+
+---
+
+## 3. Train the Model and Get Estimated Cardinalities
+
+The core of LPLM is its neural language model, which is trained using the LIKE-patterns and their corresponding ground truth cardinalities. Once trained, the model can estimate cardinalities for unseen queries.
+
+**Instructions:**
+- Use the `main.py` script to train the model and obtain estimated cardinalities.
+  
+  **Details:**
+  - The model can either be trained from scratch or reloaded from a previously saved model.
+  - Once the model is trained, it can be used to estimate the cardinalities of test queries.
+
+---
+
+## Injecting Estimated Cardinalities into PostgreSQL
+
+To use the estimated cardinalities for query optimization in PostgreSQL, follow these steps:
+
+**Instructions:**
+1. Apply the provided `benchmark.patch` to modify the PostgreSQL codebase to accept estimated cardinalities.
+2. Follow the instructions from the [End-to-End-CardEst-Benchmark](https://github.com/Nathaniel-Han/End-to-End-CardEst-Benchmark) to integrate and benchmark the selectivities in PostgreSQL.
+   
+   **Details:**
+   - Our modifications support the injection of selectivities for both LIKE and equality patterns into PostgreSQL's query planner.
+
+---
+
+## Repository Structure
+
+- `prepare_training_data.py`: Script to generate LIKE-patterns for training.
+- `compute_ground_truth.py`: Script to compute ground truth cardinalities.
+- `main.py`: Script to train the model and estimate cardinalities.
+- `benchmark.patch`: Patch for PostgreSQL to inject selectivities.
+  
+---
+
+## Requirements
+
+- **Python** (3.x)
+- **SQLite** (for computing ground truth probabilities)
+- **PyTorch** (for model training)
+- **PostgreSQL** (for integration of estimated cardinalities)
+
