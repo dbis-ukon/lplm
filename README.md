@@ -53,6 +53,12 @@ To use the estimated cardinalities for query optimization in PostgreSQL, follow 
 
 ---
 
+## Description of hardware needed.
+All our experiments were performed on a machine with two NVIDIA RTX 3090 24
+GB GPUs, AMD Ryzen Threadripper 3970X CPU and 256 GB of RAM, Ubuntu 20.04 LTS. We used
+PyTorch 1.10.1 for building the deep-learning models.
+
+
 ## Repository Structure
 
 - `prepare_training_data.py`: Script to generate LIKE-patterns for training.
