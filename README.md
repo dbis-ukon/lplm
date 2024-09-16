@@ -68,7 +68,7 @@ PyTorch 1.10.1 for building the deep-learning models.
   
 ---
 
-## Requirements
+## Software/Library Dependencies 
 
 - **Python** (3.x)
 - **SQLite** (for computing ground truth probabilities)
