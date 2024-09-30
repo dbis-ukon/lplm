@@ -251,18 +251,17 @@ def load_like_patterns(filename):
     return list_of_patterns
 
 
-
 if __name__ == "__main__":
     # Specify the paths required for running the script.
 
     # 1. Path to the SQLite database where the datasets are stored.
-    db_path = 'path to database'  # Replace with the actual path to your SQLite database.
+    db_path = 'sampleDB/author.db'  # Replace with the actual path to your SQLite database.
 
     # 2. Path to the file containing LIKE patterns that will be used for querying.
-    like_patterns_path = 'path to training dataset'  # Replace with the path to the file containing the LIKE patterns.
+    like_patterns_path = 'author_names_training_set.txt'  # Replace with the path to the file containing the LIKE patterns.
 
     # 3. Path where the ground truth probabilities will be saved after computation.
-    file_to_save_ground = 'path to save ground truth'  # Replace with the desired path to save the output file.
+    file_to_save_ground = 'author_names_training_set_groundtruth.txt'  # Replace with the desired path to save the output file.
 
     # Check if the file containing LIKE patterns exists.
     if not os.path.exists(like_patterns_path):
@@ -278,5 +277,8 @@ if __name__ == "__main__":
         # Call the main function to process the LIKE patterns and compute probabilities.
         # This will generate and save the ground truth output based on the patterns and dataset.
         main(db_path, list_of_patterns, file_to_save_ground, datasetsize)
+
+
+
 
 
