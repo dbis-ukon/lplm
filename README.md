@@ -18,6 +18,7 @@ To train LPLM, you first need a dataset of SQL LIKE-patterns. This step generate
 Once the LIKE patterns are generated, the next step is to compute the ground truth cardinalities for these patterns. These cardinalities represent the actual selectivity of the LIKE-queries when executed on a database.
 
 **Instructions:**
+- Generate a database for each dataset by 'running createdb.py'.
 - Run the `compute_ground_truth.py` script to compute the ground truth cardinalities for the generated LIKE patterns.
   
   **Details:**
@@ -37,7 +38,7 @@ The core of LPLM is its neural language model, which is trained using the LIKE-p
   **Details:**
   - The model can either be trained from scratch or reloaded from a previously saved model.
   - Once the model is trained, it can be used to estimate the cardinalities of test queries.
-
+  
 ---
 
 ## Injecting Estimated Cardinalities into PostgreSQL
