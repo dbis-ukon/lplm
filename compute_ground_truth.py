@@ -187,11 +187,11 @@ def main(db, listem, ground_truth_file_path, dataset_size):
     ground_truth_file_path (str): The path to save the output ground truth file.
     dataset_size (int): The total size of the dataset.
     """
-
     c = sqlite3.connect(db).cursor()
-    path = 'author_ground_truth' + str(ground_truth_file_path) + '.txt'
-    file_to_save = open(path, 'w')
+
+    file_to_save = open(ground_truth_file_path, 'w')
     for likepatterns in listem:
+        print(likepatterns)
         newlike = likepatterns.strip().replace(' ', '@')
         likepatterns = ('%' + newlike + '%').replace('%%', '%').replace('%_', '_').replace('_%', '_')
         if likepatterns[0] == '%':
@@ -249,6 +249,7 @@ def load_like_patterns(filename):
         for line in file:
             list_of_patterns.append(line.strip())
     return list_of_patterns
+
 
 
 if __name__ == "__main__":
