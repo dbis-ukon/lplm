@@ -2,10 +2,10 @@ import sqlite3
 
 def create_db(dataset, db_name):
     """
-       Creates an SQLite database with a table named 'column' and populates it with data from a CSV file.
+       Creates an SQLite database with a table named 'column' and populates it with data from available datasets.
 
        Args:
-           dataset (str): The file path to the CSV dataset. Each line in the dataset represents a row to be inserted.
+           dataset (str): The file path to the dataset. Each line in the dataset represents a row to be inserted.
            db_name (str): The name of the SQLite database to be created or modified.
        """
     conn = sqlite3.connect(db_name)
