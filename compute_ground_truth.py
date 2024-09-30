@@ -14,13 +14,13 @@ def return_cardinality(query_list, c, dataset_size):
     float: The conditional probability based on the LIKE pattern(s) provided.
     """
     if len(query_list) == 1:
-        cn = c.execute('SELECT count(*) FROM pattern WHERE trans LIKE ?', (query_list[0],)).fetchall()[0][0]
+        cn = c.execute('SELECT count(*) FROM column WHERE name LIKE ?', (query_list[0],)).fetchall()[0][0]
         prob = cn / dataset_size
         return prob
     else:
-        cn = c.execute('SELECT count(*) FROM pattern WHERE trans LIKE ?', (query_list[0],)).fetchall()[0][0]
+        cn = c.execute('SELECT count(*) FROM column WHERE name LIKE ?', (query_list[0],)).fetchall()[0][0]
 
-        cn1 = c.execute('SELECT count(*) FROM pattern WHERE trans LIKE ?', (query_list[1],)).fetchall()[0][0]
+        cn1 = c.execute('SELECT count(*) FROM column WHERE name LIKE ?', (query_list[1],)).fetchall()[0][0]
         if cn1 == 0:
             print(query_list)
         prob = float(cn) / cn1
