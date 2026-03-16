@@ -126,7 +126,7 @@ def LIKE_pattern_to_newLanguage(liste):
                     new += char
                     count += 1
                 else:
-                    if new[-1] != '_' and char != '_' and char != '@' and new[-1] != '@':
+                    if new[-1] != '_' and char != '_':
                         new += '$' + char
                     else:
                         new += char
